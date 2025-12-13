@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~/blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Ubuntu Mono', monospace;
+            background: #1a1a1a;
+            color: #cca962;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        a {
+            color: #5d9dd5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .terminal {
+            background: #0d0d0d;
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .terminal-header {
+            background: #2a2a2a;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .btn-close { background: #ff5f56; }
+        .btn-minimize { background: #ffbd2e; }
+        .btn-maximize { background: #27c93f; }
+
+        .terminal-title {
+            margin-left: auto;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .terminal-body {
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        .prompt {
+            color: #27c93f;
+        }
+
+        .path {
+            color: #5d9dd5;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background: #cca962;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .posts-section {
+            background: #0d0d0d;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .posts-section h2 {
+            color: #27c93f;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .post {
+            padding: 15px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .post:last-child {
+            border-bottom: none;
+        }
+
+        .post-title {
+            color: #cca962;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: color 0.3s;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .post-title:hover {
+            color: #5d9dd5;
+        }
+
+        .post-title::before {
+            content: '> ';
+            color: #27c93f;
+        }
+
+        .post-title::after {
+            content: '';
+        }
+
+        .date {
+            color: #666;
+            font-size: 0.9em;
+            margin-left: 25px;
+        }
+
+        .comment {
+            color: #666;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .terminal-body {
+                padding: 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-button btn-close"></div>
+                <div class="terminal-button btn-minimize"></div>
+                <div class="terminal-button btn-maximize"></div>
+                <div class="terminal-title">yasinxdxd@blog: ~</div>
+            </div>
+            <div class="terminal-body">
+                <div>
+                    <span class="prompt">yasinxdxd@blog</span>:<span class="path">~</span>$ <span id="typed"></span><span class="cursor"></span>
+                </div>
+                <div id="output" style="margin-top: 10px; display: none; white-space: pre-line;">Welcome to my blog!
+
+I write about code, tech, and whatever interests me.
+Feel free to explore the posts below.
+
+-- Happy reading!</div>
+            </div>
+        </div>
+
+        <div class="posts-section">
+            <h2>$ ls posts/</h2>
+            
+            <div class="post">
+                <a href="post.html?pdf=posts/hello-world.pdf" class="post-title">hello-world.pdf</a>
+                <div class="date">2024-12-14</div>
+            </div>
+
+            <!-- Add more posts here:
+            <div class="post">
+                <a href="post.html?pdf=posts/my-post.pdf" class="post-title">my-post.pdf</a>
+                <div class="date">2024-12-15</div>
+            </div>
+            -->
+        </div>
+
+        <div style="margin-top: 30px; color: #666; text-align: center;">
+            <span class="comment"># Posts are powered by <span><a href="https://typst.app/">typst</a></span></span>
+        </div>
+    </div>
+
+    <script>
+        const command = "cat welcome.txt";
+        let i = 0;
+        const typedEl = document.getElementById('typed');
+        const outputEl = document.getElementById('output');
+        const cursorEl = document.querySelector('.cursor');
+        
+        function type() {
+            if (i < command.length) {
+                typedEl.textContent += command.charAt(i);
+                i++;
+                setTimeout(type, 100);
+            } else {
+                setTimeout(() => {
+                    cursorEl.style.display = 'none';
+                    outputEl.style.display = 'block';
+                }, 300);
+            }
+        }
+        
+        setTimeout(type, 500);
+    </script>
+</body>
+</html>
