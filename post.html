@@ -118,6 +118,11 @@
             background-color: #726c4c;
         }
 
+        .post-viewer-container.pdf-mode {
+            padding: 0;
+            overflow: hidden;
+        }
+
         .svg-pages {
             display: flex;
             flex-direction: column;
@@ -130,6 +135,14 @@
             height: auto;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             border-radius: 4px;
+        }
+
+        .pdf-frame {
+            display: block;
+            width: 100%;
+            height: 80vh;
+            border: none;
+            background: #fff;
         }
 
         .loading {
@@ -164,6 +177,14 @@
             .post-viewer-container {
                 padding: 20px 10px;
                 max-height: 70vh;
+            }
+
+            .post-viewer-container.pdf-mode {
+                padding: 0;
+            }
+
+            .pdf-frame {
+                height: 70vh;
             }
         }
     </style>
@@ -207,11 +228,13 @@
             const fileName = baseName.split('/').pop();
             postTitle.textContent = fileName;
 
-            // Check if there's a PDF version for download
+            // Check if there's a PDF version (for download + fallback viewing)
             const pdfPath = baseName + '.pdf';
+            let hasPdf = false;
             try {
                 const pdfResponse = await fetch(pdfPath, { method: 'HEAD' });
                 if (pdfResponse.ok) {
+                    hasPdf = true;
                     downloadBtn.href = pdfPath;
                     downloadBtn.style.display = 'inline-block';
                 }
@@ -231,20 +254,29 @@
                     if (response.ok) {
                         svgPages.push(svgPath);
                         consecutiveFailures = 0;
-                        pageNum++;
                     } else {
                         consecutiveFailures++;
-                        pageNum++;
                     }
                 } catch (error) {
                     consecutiveFailures++;
-                    pageNum++;
                 }
+                pageNum++;
             }
 
+            // No SVGs: fall back to the PDF directly
             if (svgPages.length === 0) {
-                loading.textContent = 'No SVG pages found. Make sure to compile with: typst compile file.typ posts/svg/file-{p}.svg --format svg';
-                loading.className = 'error';
+                if (hasPdf) {
+                    loading.style.display = 'none';
+                    viewerContainer.classList.add('pdf-mode');
+                    const frame = document.createElement('iframe');
+                    frame.src = pdfPath;
+                    frame.className = 'pdf-frame';
+                    frame.title = fileName;
+                    viewerContainer.appendChild(frame);
+                } else {
+                    loading.textContent = 'No SVG pages or PDF found for this post.';
+                    loading.className = 'error';
+                }
                 return;
             }
 
@@ -252,14 +284,13 @@
             const svgContainer = document.createElement('div');
             svgContainer.className = 'svg-pages';
 
-            // Load all SVG pages
-            for (const svgPath of svgPages) {
+            svgPages.forEach((svgPath, i) => {
                 const img = document.createElement('img');
                 img.src = svgPath;
                 img.className = 'svg-page';
-                img.alt = `Page ${svgPages.indexOf(svgPath) + 1}`;
+                img.alt = `Page ${i + 1}`;
                 svgContainer.appendChild(img);
-            }
+            });
 
             loading.style.display = 'none';
             viewerContainer.appendChild(svgContainer);
